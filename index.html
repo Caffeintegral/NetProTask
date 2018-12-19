@@ -1,0 +1,122 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        firebase.initializeApp({
+            databaseURL: "https://netpro-3c4a0.firebaseio.com/",
+        });
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <div id="app">
+            <div>{{sender}}さん</div>
+            <label for="nameInput">メッセージ</label>
+            <input type="txt" id="nameInput" v-model="message">
+
+            <div>
+                <button type="button" class="btn btn-default" @click="join">
+                    参加する
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-default" @click="sendMessage">
+                    送信
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-default" @click="removeMessage">
+                    メッセージをすべて削除
+                </button>
+            </div>
+
+            <div>
+                <ul>
+                    <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                list: [],
+                sender: '名無し',
+                message: '',
+            },
+            created() {
+                this.getMessageFromDB();
+            },
+
+            methods: {
+                getMessageFromDB() {
+                    firebase.database().ref('messages/room1/').on('value', snapshot => {
+                        if (snapshot) {
+                            const rootList = snapshot.val();
+                            let list = [];
+                            Object.keys(rootList).forEach((val, key) => {
+                                rootList[val].id = val;
+                                list.push(rootList[val]);
+                            })
+                            this.list = list;
+                        }
+                        console.log(this.list);
+                    })
+
+
+                },
+                sendMessage() {
+                    if (!this.sender || !this.message) return
+                    firebase.database().ref('messages/room1/').push({
+                        sender: this.sender,
+                        message: this.message
+                    })
+                    this.message = ''
+                },
+
+                removeMessage() {
+                    firebase.database().ref('messages/').set({ room1: "" });
+
+                },
+
+                join() {
+                    sender = window.prompt("ユーザー名を入力してください", "");
+                    if (sender != "" && sender != null) {
+                        this.sender = sender;
+                        // userArray.push(sender);
+                        window.alert('ようこそ' + sender + 'さん');
+                        // console.log(userArray);
+                    }
+                    else if (sender != "" && sender != null) {
+
+                        window.alert('名前を入力してください');
+                    }
+
+                    else {
+
+                        window.alert('キャンセルされました');
+
+                    }
+                    console.log(this.sender);
+
+                }
+            },
+            mounted() {
+
+            }
+        })
+    </script>
+
+
+</body>
+
+</html>

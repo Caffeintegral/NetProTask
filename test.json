@@ -1,0 +1,62 @@
+{
+    "rooms": {
+        "room1": {
+            "title": "test",
+            "members": {
+                "aaa": true,
+                "bbb": true
+            }
+        },
+        "room2": {
+            "title": "test2",
+            "members": {
+                "aaa": true,
+                "bbb": false
+            }
+        }
+    },
+    "messages": {
+        "room1": {
+            "message01": {
+                "sender": "aaa",
+                "message": "72"
+            },
+            "message02": {
+                "sender": "bbb",
+                "message": "334"
+            }
+        },
+        "room2": {
+            "message01": {
+                "sender": "aaa",
+                "message": "72"
+            },
+            "message02": {
+                "sender": "aaa",
+                "message": "334"
+            }
+        }
+    },
+    "pictures": {
+        "room1": {
+            "picture01": {
+                "sender": "aaa",
+                "picture": "72.img"
+            },
+            "picture02": {
+                "sender": "bbb",
+                "picture": "334.img"
+            }
+        },
+        "room2": {
+            "picture01": {
+                "sender": "aaa",
+                "picture": "72.img"
+            },
+            "picture02": {
+                "sender": "aaa",
+                "picture": "334.img"
+            }
+        }
+    }
+}
