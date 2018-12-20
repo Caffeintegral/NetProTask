@@ -13,6 +13,7 @@
             databaseURL: "https://netpro-3c4a0.firebaseio.com/",
         });
     </script>
+    <title>チャットするページ</title>
 </head>
 
 <body>
@@ -52,13 +53,19 @@
                 list: [],
                 sender: '名無し',
                 message: '',
+                naneList: [],
+
             },
             created() {
                 this.getMessageFromDB();
+
             },
 
             methods: {
-                getMessageFromDB() {
+                handler: function handler(event) {
+                    console.log('334');
+                },
+                getMessageFromDB() {//BDからメッセージを参照して代入
                     firebase.database().ref('messages/room1/').on('value', snapshot => {
                         if (snapshot) {
                             const rootList = snapshot.val();
