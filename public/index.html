@@ -13,6 +13,7 @@
             databaseURL: "https://netpro-3c4a0.firebaseio.com/",
         });
     </script>
+    <script src="/socket.io/socket.io.js"></script>
     <title>チャットするページ</title>
 </head>
 
@@ -54,10 +55,15 @@
                 sender: '名無し',
                 message: '',
                 naneList: [],
+                socketio: io.connect('http://localhost:3000'),
 
             },
             created() {
                 this.getMessageFromDB();
+                this.socketio.on("connected", function(sender) {});
+                // this.socketio.on("publish", function (data) { addMessage(data.value); });
+                this.socketio.on("disconnect", function () {});
+
 
             },
 
@@ -81,6 +87,15 @@
 
 
                 },
+                sendJoin(enterMessage) {
+                    if (!this.sender || !enterMessage) return
+                    firebase.database().ref('messages/room1/').push({
+                        sender: this.sender,
+                        message: enterMessage
+                    })
+                    // this.message = ''
+                },
+
                 sendMessage() {
                     if (!this.sender || !this.message) return
                     firebase.database().ref('messages/room1/').push({
@@ -101,6 +116,8 @@
                         this.sender = sender;
                         // userArray.push(sender);
                         window.alert('ようこそ' + sender + 'さん');
+                        this.socketio.emit("connected", sender);
+                        this.sendJoin(sender + 'さんが参加しました．');
                         // console.log(userArray);
                     }
                     else if (sender != "" && sender != null) {

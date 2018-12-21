@@ -10,10 +10,9 @@ var server = http.createServer(function (req, res) {
     console.log('listening on localhost:3000');
     server.listen(3000);
 
-var io = socketIO.listen(server);
-
 // socket.IOを用いたリアルタイムWebを実装します。
 var io = socketIO.listen(server);
+var userHash = {};
 
 // 接続されたら、connected!とコンソールにメッセージを表示します。
 io.sockets.on("connection", function (socket) {
@@ -41,5 +40,25 @@ io.sockets.on("connection", function (socket) {
     console.log(width);
     socket.broadcast.emit("lineWidth", width);
   });
+
+  socket.on("connected", function (sender) {
+    var msg = sender + "さんが入室しました";
+    userHash[socket.id] = sender;
+    io.sockets.emit("publish", {value: msg});
+    console.log(msg);
+  });
+
+  
+    socket.on("disconnect", function () {
+        if (userHash[socket.id]) {
+            var msg = userHash[socket.id] + "さんが退出しました";
+            delete userHash[socket.id];
+            io.sockets.emit("publish", {value: msg});
+            console.log(msg);
+            // this.sendJoin(msg);
+        }
+        
+    });
 });
+
 
