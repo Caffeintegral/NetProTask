@@ -51,6 +51,8 @@
                 </button>
             </div>
 
+            <div><input type=text id='test' value='aaaaaaaaaaaaaaa'></div>
+
             <div>
                 <ul>
                     <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
@@ -71,6 +73,7 @@
                 playerList: [],
                 nameList: [],
                 socketio: io.connect('http://localhost:3000'),
+                targetElement: document.getElementById('test'),
 
             },
             created() {
@@ -83,7 +86,18 @@
                 // });
                 // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
                 this.socketio.on("disconnect", function () { });
+
+                this.socketio.on("info", function () {
+
+                });
+
                 // this.socketio.on("getUserList", function () { });
+
+                // var targetElement = document.getElementById('test');
+                // 入力可にする
+                // targetElement.readOnly = false;
+                // 入力不可にする
+                this.targetElement.readOnly = true;
 
 
             },
@@ -213,7 +227,10 @@
                     this.nowPlayer = this.playerList[this.nowPlayerCounter].name;
                     console.log(this.nowPlayer);
 
-                    firebase.database().ref('nowPlayer/room1').set({ name: this.nowPlayer });
+                    firebase.database().ref('nowPlayer/room1').set({
+                        name: this.nowPlayer,
+                        isNowPlayer: true
+                    });
 
                     this.nowPlayerCounter++;
 
