@@ -60,9 +60,12 @@
             },
             created() {
                 this.getMessageFromDB();
-                this.socketio.on("connected", function(sender) {});
-                // this.socketio.on("publish", function (data) { addMessage(data.value); });
-                this.socketio.on("disconnect", function () {});
+                this.socketio.on("connected", function (sender) { });
+                this.socketio.on("publish", function (data) {
+                    this.sendJoin("sender" + 'さんが参加しました．');
+                    console.log("334");
+                });
+                this.socketio.on("disconnect", function () { });
 
 
             },
@@ -135,6 +138,7 @@
                 }
             },
             mounted() {
+
 
             }
         })

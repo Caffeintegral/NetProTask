@@ -1,14 +1,24 @@
 var http = require("http");
 var socketIO = require("socket.io");
 var fs = require("fs");
+var admin = require('firebase-admin');
+var serviceAccount = require('../FirebaseAdminSDK_netPro.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://netpro-3c4a0.firebaseio.com/" //データベースのURL
+});
+
+var db = admin.database();
+var ref = db.ref('messages/room1/');
 
 var server = http.createServer(function (req, res) {
-    res.writeHead(200, {"Content-Type":"text/html"});
-    var output = fs.readFileSync("./public/index.html", "utf-8");
-    res.end(output);
-    });
-    console.log('listening on localhost:3000');
-    server.listen(3000);
+  res.writeHead(200, { "Content-Type": "text/html" });
+  var output = fs.readFileSync("./public/index.html", "utf-8");
+  res.end(output);
+});
+console.log('listening on localhost:3000');
+server.listen(3000);
 
 // socket.IOを用いたリアルタイムWebを実装します。
 var io = socketIO.listen(server);
@@ -43,22 +53,22 @@ io.sockets.on("connection", function (socket) {
 
   socket.on("connected", function (sender) {
     var msg = sender + "さんが入室しました";
-    userHash[socket.id] = sender;
-    io.sockets.emit("publish", {value: msg});
-    console.log(msg);
+    userHash[socket.id] = sender; console.log(msg);
   });
 
-  
-    socket.on("disconnect", function () {
-        if (userHash[socket.id]) {
-            var msg = userHash[socket.id] + "さんが退出しました";
-            delete userHash[socket.id];
-            io.sockets.emit("publish", {value: msg});
-            console.log(msg);
-            // this.sendJoin(msg);
-        }
-        
-    });
+  socket.on("disconnect", function () {
+    if (userHash[socket.id]) {
+      var msg = userHash[socket.id] + "さんが退出しました";
+      ref.push({
+        sender: userHash[socket.id],
+        message: msg
+      });
+      delete userHash[socket.id];
+      io.sockets.emit("publish", { value: msg });
+      console.log(msg);
+    }
+
+  });
 });
 
 
