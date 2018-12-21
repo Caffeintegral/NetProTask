@@ -58,5 +58,39 @@
                 "picture": "334.img"
             }
         }
+    },
+    "users": {
+        "room1": {
+            "name1": {
+                "name": "千早",
+                "isNowPlayer": false
+            },
+            "name2": {
+                "name": "日向子",
+                "isNowPlayer": false
+            }
+        },
+        "room2": {
+            "name1": {
+                "name": "千早",
+                "isNowPlayer": false
+            },
+            "name2": {
+                "name": "日向子",
+                "isNowPlayer": false
+            }
+        }
+    },
+    "nowPlayer": {
+        "room1": {
+            "name1": {
+                "name": "千早"
+            }
+        },
+        "room2": {
+            "name1": {
+                "name": "千早"
+            }
+        }
     }
 }
