@@ -92,5 +92,10 @@
                 "name": "千早"
             }
         }
+    },
+    "nowPlayerCounter": {
+        "room1": {
+            "count": 0
+        }
     }
 }

@@ -28,6 +28,7 @@ var userHash = {};
 var userSet = {};
 var userList = [];
 var count = 0;
+var userCount = 0;
 
 // 接続されたら、connected!とコンソールにメッセージを表示します。
 io.sockets.on("connection", function (socket) {
@@ -56,6 +57,19 @@ io.sockets.on("connection", function (socket) {
   socket.on("lineWidth", function (width) {
     console.log(width);
     socket.broadcast.emit("lineWidth", width);
+  });
+
+  socket.on("getCount", function (data) {
+    // io.sockets.emit("publish", { value: data.value });
+    userCount = data;
+    console.log(data);
+  });
+
+  socket.on("sendCount", function (data) {
+    data = userCount
+    // io.sockets.emit("publish", { value: data.value });
+    socket.emit("sendCount", data);
+    console.log(userCount);
   });
 
 
@@ -105,6 +119,9 @@ io.sockets.on("connection", function (socket) {
       });
       count = 0;
       db.ref('nowPlayer/room1').set({ name: '未定' });
+      db.ref('nowPlayerCounter/room1').set({
+        count: 0,
+      });
     }
 
   });
