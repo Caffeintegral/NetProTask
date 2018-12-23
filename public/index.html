@@ -19,70 +19,71 @@
 
 <body>
     <div id="app">
-        <div id="app">
-            <div>{{sender}}さん</div>
-            <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div>
-            <label for="nameInput">メッセージ</label>
-            <input type="txt" id="nameInput" v-model="message">
+        <div>{{sender}}さん</div>
+        <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div>
+        <label for="nameInput">メッセージ</label>
+        <input type="txt" id="nameInput" v-model="message">
 
-            <div>
-                <button type="button" class="btn btn-default" @click="join">
-                    参加する
-                </button>
-            </div>
-            <div>
-                <button type="button" class="btn btn-default" @click="sendMessage">
-                    送信
-                </button>
-            </div>
-            <div>
-                <button type="button" class="btn btn-default" @click="nextUser">
-                    ゲームを開始
-                </button>
-            </div>
-            <div>
-                <button type="button" class="btn btn-default" @click="nextUser">
-                    次の人へ
-                </button>
-            </div>
-            <div>
-                <button type="button" class="btn btn-default" @click="removeMessage">
-                    メッセージをすべて削除
-                </button>
-            </div>
-
-            <div><input type=text id='test' value='aaaaaaaaaaaaaaa'></div>
-
-            <div>
-                <ul>
-                    <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
-                </ul>
-            </div>
+        <div>
+            <button @click="join">
+                参加する
+            </button>
         </div>
+        <div>
+            <button @click="sendMessage">
+                送信
+            </button>
+        </div>
+        <div>
+            <button @click="nextUser">
+                ゲームを開始
+            </button>
+        </div>
+        <div>
+            <button :disabled="isCantPushButton" @click="nextUser">
+                <!-- :disabled="isCantPushButton" で　isCantPushButtonがtrueの時押せない -->
+                次の人へ
+            </button>
+        </div>
+        <div>
+            <button @click="removeMessage">
+                メッセージをすべて削除
+            </button>
+        </div>
+
+        <button :disabled="isCantPushButton" @click="test">自分のターンじゃないと押せない</button>
+
+        <div>
+            <ul>
+                <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
+            </ul>
+        </div>
+
+        <div>
+            <!-- ここのタグの中にとりあえずキャンバスを実装して -->
+        </div>
+
+
+
     </div>
     <script>
-        // import io from 'socket.io-client'   
         new Vue({
             el: "#app",
             data: {
-                list: [],
-                sender: '名無し',
-                nowPlayer: '未定',
-                nowPlayerCounter: 0,
-                isNowPlayer: false,
-                message: '',
-                playerList: [],
-                nameList: [],
-                // socketio: io.connect('http://localhost:3000'),
-                socketio: '',
-                targetElement: document.getElementById('test'),
-
+                list: [], //チャットの内容が入る
+                sender: '名無し', //名前を入れて参加したときの名前
+                nowPlayer: '未定', //○○さんのターンです　で表示される名前
+                nowPlayerCounter: 0, //誰のターンなのか数値でカウントしてる
+                isNowPlayer: false, // 今ターンか
+                isCantPushButton: true, //ボタン押せるか
+                message: '', // チャットの内容
+                nameList: [], //参加者一覧の配列
+                socketio: '', //そけっとあいおー
             },
             watch: {
                 nowPlayer: {
-                    handler: function (val, oldVal) {
+                    handler: function (val, oldVal) { //nowPlayerの値が変更されたとき==ターンが移ったとき
                         this.nowPlayerFlag();
-                        this.setNowPlayerCounter();
                     },
                     deep: true
                 }
@@ -91,76 +92,38 @@
                 this.socketio = io();
                 this.getMessageFromDB();
                 this.getNowPlayer();
-                // this.socketio.on("connected", function (sender) {
-                //     console.log(sender);
-                //  });
-                // // this.socketio.on("publish", function (data) {
-                // //     this.sendJoin("sender" + 'さんが参加しました．');
-                // //     console.log("334");
-                // // });
-                // // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
-                // this.socketio.on('getCount', function(num){
-                //         console.log(num);
-                //         this.nowPlayerCounter = num;
-                //     });
-
-                // this.socketio.on("getCount",(num) =>{
-                //         console.log(num);
-                //         this.nowPlayerCounter = num;
-                // });
-                
-                // this.socketio.on("sendCount", function (data) {});
-
-                // this.socketio.on("disconnect", function () { });
-
-                // this.socketio.on("info", function () {
-
-                // });
-
-                // this.socketio.on("getUserList", function () { });
-
-                // var targetElement = document.getElementById('test');
-                // 入力可にする
-                // targetElement.readOnly = false;
-                // 入力不可にする
-
-                this.targetElement.readOnly = true;
-
-
-
-
+                this.setNowPlayerCounter();
             },
 
             methods: {
-                addMessage(msg) {
-                    console.log("できてる");
+                test() {
+                    console.log("afo");
                 },
-
-
-                handler: function handler(event) {
-                    console.log('334');
-                },
-
                 setNowPlayerCounter() {
-                    console.log("setNowPlayerCounter")
+
                     firebase.database().ref('nowPlayerCounter/room1/').on('value', snapshot => {
-                        console.log(this.playerList);
+                        console.log("PlayerList" + this.nameList);
 
                         if (snapshot) {
                             const rootList = snapshot.val();
-                            let nowPlayerCounter = 0;
+                            var nowPlayerCounter = 0;
                             Object.keys(rootList).forEach((val, key) => {
                                 rootList[val].id = val;
                                 nowPlayerCounter = (rootList[val]);
-
                             })
                             this.nowPlayerCounter = nowPlayerCounter;
-                            console.log(this.nowPlayerCounter);
                         }
                     })
-                     firebase.database().ref('nowPlayerCounter/room1').set({
-                        count: this.nowPlayerCounter,
-                    });
+                },
+
+                turnCounter() {//ターンの計算　未定の時はスルーしないと0から始まれない
+                    if (this.nowPlayer != '未定') {
+
+                        this.nowPlayerCounter++;
+                        if (this.nowPlayerCounter >= this.nameList.length) { //人数超えないように
+                            this.nowPlayerCounter = 0;
+                        }
+                    }
                 },
 
                 getMessageFromDB() {//BDからメッセージを参照して代入
@@ -174,12 +137,11 @@
                             })
                             this.list = list;
                         }
-                        console.log(this.list);
                     })
-                    
+
                 },
 
-                getNowPlayer() {
+                getNowPlayer() { //DBからnowPlayerを受け取る
                     firebase.database().ref('nowPlayer/room1/').on('value', snapshot => {
                         if (snapshot) {
                             const rootList = snapshot.val();
@@ -187,48 +149,25 @@
                             Object.keys(rootList).forEach((val, key) => {
                                 rootList[val].id = val;
                                 nowPlayer = rootList[val];
-                                // console.log(nowPlayer);
                             })
                             this.nowPlayer = nowPlayer;
                         }
-                        // console.log(this.nowPlayer);
                     })
-                    
-
-                    //     firebase.database().ref('nowPlayerCounter/room1/').on('value', snapshot => {
-                    //     console.log(this.playerList);
-
-                    //     if (snapshot) {
-                    //         const rootList = snapshot.val();
-                    //         let nowPlayerCounter = 0;
-                    //         Object.keys(rootList).forEach((val, key) => {
-                    //             rootList[val].id = val;
-                    //             nowPlayerCounter = (rootList[val]);
-
-                    //         })
-                    //         this.nowPlayerCounter = nowPlayerCounter;
-                    //         console.log(this.nowPlayerCounter);
-                    //     }
-                    // })
-                    //  firebase.database().ref('nowPlayerCounter/room1').set({
-                    //     count: this.nowPlayerCounter,
-                    // });
-
-                    
-                    
                 },
 
-                nowPlayerFlag() {
+                nowPlayerFlag() { //今自分のターンなのかの判定
                     if (this.nowPlayer == this.sender) {
                         console.log("あなたのターンです");
-                        this.targetElement.readOnly = false;
-                    } else {
+                        this.isCantPushButton = false;
+                        this.isNowPlayer = true;
+                    } if (this.nowPlayer != this.sender) {
                         console.log(this.nowPlayer + "さんのターンです");
-                        this.targetElement.readOnly = true;
+                        this.isCantPushButton = true;
+                        this.isNowPlayer = false;
                     }
                 },
 
-                sendJoin(enterMessage) {
+                sendJoin(enterMessage) { //入室したとき　”入室しましたのメッセージを送る”
                     if (!this.sender || !enterMessage) return
                     firebase.database().ref('messages/room1/').push({
                         sender: this.sender,
@@ -238,7 +177,7 @@
 
 
                 //ボタン関連
-                sendMessage() {
+                sendMessage() { //メッセージを送る（DBに）
                     if (!this.sender || !this.message) return
                     firebase.database().ref('messages/room1/').push({
                         sender: this.sender,
@@ -247,30 +186,23 @@
                     this.message = ''
                 },
 
-                join() {
+                join() { //参加ボタンを押したとき　名前入力させてDBに投げる
                     sender = window.prompt("ユーザー名を入力してください", "");
                     if (sender != "" && sender != null) {
                         this.sender = sender;
-                        // userArray.push(sender);
                         window.alert('ようこそ' + sender + 'さん');
                         this.socketio.emit("connected", sender);
                         this.sendJoin(sender + 'さんが参加しました．');
-                        // console.log(userArray);
 
                         firebase.database().ref('users/room1/').on('value', snapshot => {
                             if (snapshot) {
                                 const rootList = snapshot.val();
                                 let nameList = [];
-                                let playerList = [];
                                 Object.keys(rootList).forEach((val, key) => {
                                     rootList[val].id = val;
                                     nameList.push(rootList[val].name);
-                                    playerList.push(rootList[val]);
-
                                 })
                                 this.nameList = nameList;
-                                this.playerList = playerList;
-                                console.log(this.playerList);
                             }
                         })
                     }
@@ -284,145 +216,37 @@
                         window.alert('キャンセルされました');
 
                     }
-                    console.log(this.sender);
 
                 },
 
-                removeMessage() {
+                removeMessage() { //メッセージ全削除（誰もいなくなったときとかに実行予定）
                     firebase.database().ref('messages/').set({ room1: "" });
-
                 },
 
-                nextUser() {
+                nextUser() { //次へボタンを押したとき　DBに今誰のターンなのかを投げ，カウントも投げてる
+                    this.turnCounter();
 
-                    // this.socketio.on("sendCount", function (data) {
-                    //     this.nowPlayerCounter = data;
-                    //     console.log(this.nowPlayerCounter);
-                    // });
-
-                    
-
-                    // firebase.database().ref('users/room1/').on('value', snapshot => {
-
-                    //     if (snapshot) {
-                    //         const rootList = snapshot.val();
-                    //         let nameList = [];
-                    //         let playerList = [];
-                    //         Object.keys(rootList).forEach((val, key) => {
-                    //             rootList[val].id = val;
-                    //             nameList.push(rootList[val]);
-                    //             playerList.push(rootList[val]);
-
-                    //         })
-                    //         this.nameList = nameList;
-                    //         this.playerList = playerList;
-                    //         console.log(this.playerList);
-                    //     }
-
-                    // })
-
-                    // firebase.database().ref('nowPlayerCounter/room1/').on('value', snapshot => {
-                    //     console.log(this.playerList);
-
-                    //     if (snapshot) {
-                    //         const rootList = snapshot.val();
-                    //         let nowPlayerCounter = 0;
-                    //         Object.keys(rootList).forEach((val, key) => {
-                    //             rootList[val].id = val;
-                    //             nowPlayerCounter = (rootList[val]);
-
-                    //         })
-                    //         this.nowPlayerCounter = nowPlayerCounter;
-                    //         console.log(this.nowPlayerCounter);
-                    //     }
-
-                   
-
-                    // })
-                     // firebase.database().ref('nowPlayerCounter/room1').set({
-                    //     count: this.nowPlayerCounter,
-                    // });
-                    // this.nowPlayerCounter++;
-
-                    // if (this.nowPlayerCounter >= this.playerList.length) {
-                    //     this.nowPlayerCounter = 0;
-                    // }
-                    // this.socketio.emit("sendCount", this.nowPlayerCounter);
-
-
-                    // this.socketio.emit("getCount", this.nowPlayerCounter);
-
-                    // this.socketio.on('getCount', function(num){
-                    //     console.log(num);
-                    //     this.nowPlayerCounter = num;
-                    // });
-                    console.log(this.nowPlayerCounter);
-
-                    this.nowPlayer = this.playerList[this.nowPlayerCounter].name;
-                    // console.log(this.nowPlayer);
+                    this.nowPlayer = this.nameList[this.nowPlayerCounter];
 
                     firebase.database().ref('nowPlayer/room1').set({
                         name: this.nowPlayer,
                         isNowPlayer: true
                     });
 
-                    if (this.nowPlayerCounter > this.playerList.length) {
-                        this.nowPlayerCounter = 0;
-                    }
-
-                    this.nowPlayerCounter++;
-
-
-
-
-                    // if (this.nowPlayerCounter >= this.playerList.length) {
-                    //     this.nowPlayerCounter = 0;
-                    // }
-
-                    
-
-
-
-
-
+                    firebase.database().ref('nowPlayerCounter/room1').set({
+                        count: this.nowPlayerCounter,
+                    });
                 }
             },
             mounted() {
-                
-                this.socketio.on("connected", function (sender) {
+                this.socketio.on("connected", function (sender) { //おまじない
                     console.log(sender);
-                 });
-                // this.socketio.on("publish", function (data) {
-                //     this.sendJoin("sender" + 'さんが参加しました．');
-                //     console.log("334");
-                // });
-                // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
-                // this.socketio.on('getCount', function(num){
-                //         console.log(num);
-                //         this.nowPlayerCounter = num;
-                //     });
-
-                
-                
-                // this.socketio.on("sendCount", function (data) {});
-                // this.socketio.on("getCount",(num) =>{
-                //     console.log(num);
-                //         this.nowPlayerCounter = num;
-                // });
-
-                
-
+                });
                 this.socketio.on("disconnect", function () { });
-
                 this.socketio.on("info", function () {
-
                 });
 
-                setTimeout(() => {
-                    this.isLoading = false
-                    }, 1000)
-                },
-
+            },
         })
     </script>
 

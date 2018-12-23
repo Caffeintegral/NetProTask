@@ -34,51 +34,6 @@ var userCount = 0;
 io.sockets.on("connection", function (socket) {
   // console.log("connected");
 
-
-
-  // 描画情報がクライアントから渡されたら、接続中の他ユーザーへ
-  // broadcastで描画情報を送ります。
-  // ちなみに、最近のsocket.IOでは、イベント名(以下だとdraw)は
-  // 自由にネーミング出来るようになったようです。便利！！
-  socket.on("draw", function (data) {
-    console.log(data);
-    socket.broadcast.emit("draw", data);
-  });
-
-  // 色変更情報がクライアントからきたら、
-  // 他ユーザーへ変更後の色を通知します。
-  socket.on("color", function (color) {
-    console.log(color);
-    socket.broadcast.emit("color", color);
-  });
-
-  // 線の太さの変更情報がクライアントからきたら、
-  // 他ユーザーへ変更後の線の太さを通知します。
-  socket.on("lineWidth", function (width) {
-    console.log(width);
-    socket.broadcast.emit("lineWidth", width);
-  });
-
-  socket.on("getCount", function (data) {
-    // io.sockets.emit("publish", { value: data.value });
-    console.log(data);
-    userCount = data;
-    userCount++;
-    if(userCount >= userList.length){
-      userCount = 0;
-    }
-    console.log(userCount);
-    socket.emit("getCount", userCount);
-  });
-
-  socket.on("sendCount", function (data) {
-    data = userCount
-    // io.sockets.emit("publish", { value: data.value });
-    socket.emit("sendCount", data);
-    console.log(userCount);
-  });
-
-
   //接続したとき（入室したとき）
   socket.on("connected", function (sender) {
     var msg = sender + "さんが入室しました";
@@ -110,16 +65,14 @@ io.sockets.on("connection", function (socket) {
       console.log(senderValue);
       db.ref('users/room1/' + senderValue + '/').remove();
 
-
       userList.pop();
       usersRef.child(userHash[socket.id]).remove();
       delete userHash[socket.id];
-      // io.sockets.emit("publish", { value: msg });
       console.log(userList);
       console.log(msg);
     }
 
-    if (userList.length == 0) {
+    if (userList.length == 0) { //誰もいなくなったとき部屋消してる（正確には誰もいなくなった後誰かがアクセスしたとき）
       usersRef.set({
         0: "",
       });
@@ -130,6 +83,31 @@ io.sockets.on("connection", function (socket) {
       });
     }
 
+  });
+
+  //ここから下がとりあえずコピペした絵を描くやつのサーバ側
+
+  // 描画情報がクライアントから渡されたら、接続中の他ユーザーへ
+  // broadcastで描画情報を送ります。
+  // ちなみに、最近のsocket.IOでは、イベント名(以下だとdraw)は
+  // 自由にネーミング出来るようになったようです。便利！！
+  socket.on("draw", function (data) {
+    console.log(data);
+    socket.broadcast.emit("draw", data);
+  });
+
+  // 色変更情報がクライアントからきたら、
+  // 他ユーザーへ変更後の色を通知します。
+  socket.on("color", function (color) {
+    console.log(color);
+    socket.broadcast.emit("color", color);
+  });
+
+  // 線の太さの変更情報がクライアントからきたら、
+  // 他ユーザーへ変更後の線の太さを通知します。
+  socket.on("lineWidth", function (width) {
+    console.log(width);
+    socket.broadcast.emit("lineWidth", width);
   });
 
 
