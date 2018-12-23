@@ -21,7 +21,7 @@
     <div id="app">
         <div id="app">
             <div>{{sender}}さん</div>
-            <div>{{nowPlayer}}さんのターンです</div>
+            <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div>
             <label for="nameInput">メッセージ</label>
             <input type="txt" id="nameInput" v-model="message">
 
@@ -61,6 +61,7 @@
         </div>
     </div>
     <script>
+        // import io from 'socket.io-client'   
         new Vue({
             el: "#app",
             data: {
@@ -72,7 +73,8 @@
                 message: '',
                 playerList: [],
                 nameList: [],
-                socketio: io.connect('http://localhost:3000'),
+                // socketio: io.connect('http://localhost:3000'),
+                socketio: '',
                 targetElement: document.getElementById('test'),
 
             },
@@ -80,27 +82,40 @@
                 nowPlayer: {
                     handler: function (val, oldVal) {
                         this.nowPlayerFlag();
-                        // this.setNowPlayerCounter();
+                        this.setNowPlayerCounter();
                     },
                     deep: true
                 }
             },
             created() {
+                this.socketio = io();
                 this.getMessageFromDB();
                 this.getNowPlayer();
-                this.socketio.on("connected", function (sender) { });
-                // this.socketio.on("publish", function (data) {
-                //     this.sendJoin("sender" + 'さんが参加しました．');
-                //     console.log("334");
+                // this.socketio.on("connected", function (sender) {
+                //     console.log(sender);
+                //  });
+                // // this.socketio.on("publish", function (data) {
+                // //     this.sendJoin("sender" + 'さんが参加しました．');
+                // //     console.log("334");
+                // // });
+                // // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
+                // this.socketio.on('getCount', function(num){
+                //         console.log(num);
+                //         this.nowPlayerCounter = num;
+                //     });
+
+                // this.socketio.on("getCount",(num) =>{
+                //         console.log(num);
+                //         this.nowPlayerCounter = num;
                 // });
-                // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
-                this.socketio.on("getCount", function (data) { });
+                
+                // this.socketio.on("sendCount", function (data) {});
 
-                this.socketio.on("disconnect", function () { });
+                // this.socketio.on("disconnect", function () { });
 
-                this.socketio.on("info", function () {
+                // this.socketio.on("info", function () {
 
-                });
+                // });
 
                 // this.socketio.on("getUserList", function () { });
 
@@ -127,15 +142,25 @@
                 },
 
                 setNowPlayerCounter() {
-                    console.log(this.nameList)
-                    // var num = this.nameList.indexOf(this.nowPlayer);
-                    // this.nowPlayerCounter = num;
-                    // console.log(num)
+                    console.log("setNowPlayerCounter")
+                    firebase.database().ref('nowPlayerCounter/room1/').on('value', snapshot => {
+                        console.log(this.playerList);
 
-                    // this.socketio.on("sendCount", function (data) {
-                    //     this.nowPlayerCounter = data;
-                    //     console.log(this.nowPlayerCounter);
-                    // });
+                        if (snapshot) {
+                            const rootList = snapshot.val();
+                            let nowPlayerCounter = 0;
+                            Object.keys(rootList).forEach((val, key) => {
+                                rootList[val].id = val;
+                                nowPlayerCounter = (rootList[val]);
+
+                            })
+                            this.nowPlayerCounter = nowPlayerCounter;
+                            console.log(this.nowPlayerCounter);
+                        }
+                    })
+                     firebase.database().ref('nowPlayerCounter/room1').set({
+                        count: this.nowPlayerCounter,
+                    });
                 },
 
                 getMessageFromDB() {//BDからメッセージを参照して代入
@@ -151,6 +176,7 @@
                         }
                         console.log(this.list);
                     })
+                    
                 },
 
                 getNowPlayer() {
@@ -167,6 +193,29 @@
                         }
                         // console.log(this.nowPlayer);
                     })
+                    
+
+                    //     firebase.database().ref('nowPlayerCounter/room1/').on('value', snapshot => {
+                    //     console.log(this.playerList);
+
+                    //     if (snapshot) {
+                    //         const rootList = snapshot.val();
+                    //         let nowPlayerCounter = 0;
+                    //         Object.keys(rootList).forEach((val, key) => {
+                    //             rootList[val].id = val;
+                    //             nowPlayerCounter = (rootList[val]);
+
+                    //         })
+                    //         this.nowPlayerCounter = nowPlayerCounter;
+                    //         console.log(this.nowPlayerCounter);
+                    //     }
+                    // })
+                    //  firebase.database().ref('nowPlayerCounter/room1').set({
+                    //     count: this.nowPlayerCounter,
+                    // });
+
+                    
+                    
                 },
 
                 nowPlayerFlag() {
@@ -246,10 +295,12 @@
 
                 nextUser() {
 
-                    this.socketio.on("sendCount", function (data) {
-                        this.nowPlayerCounter = data;
-                        console.log(this.nowPlayerCounter);
-                    });
+                    // this.socketio.on("sendCount", function (data) {
+                    //     this.nowPlayerCounter = data;
+                    //     console.log(this.nowPlayerCounter);
+                    // });
+
+                    
 
                     // firebase.database().ref('users/room1/').on('value', snapshot => {
 
@@ -285,13 +336,27 @@
                     //         console.log(this.nowPlayerCounter);
                     //     }
 
-                    // })
-                    this.nowPlayerCounter++;
+                   
 
-                    if (this.nowPlayerCounter >= this.playerList.length) {
-                        this.nowPlayerCounter = 0;
-                    }
-                    this.socketio.emit("getCount", this.nowPlayerCounter);
+                    // })
+                     // firebase.database().ref('nowPlayerCounter/room1').set({
+                    //     count: this.nowPlayerCounter,
+                    // });
+                    // this.nowPlayerCounter++;
+
+                    // if (this.nowPlayerCounter >= this.playerList.length) {
+                    //     this.nowPlayerCounter = 0;
+                    // }
+                    // this.socketio.emit("sendCount", this.nowPlayerCounter);
+
+
+                    // this.socketio.emit("getCount", this.nowPlayerCounter);
+
+                    // this.socketio.on('getCount', function(num){
+                    //     console.log(num);
+                    //     this.nowPlayerCounter = num;
+                    // });
+                    console.log(this.nowPlayerCounter);
 
                     this.nowPlayer = this.playerList[this.nowPlayerCounter].name;
                     // console.log(this.nowPlayer);
@@ -301,6 +366,12 @@
                         isNowPlayer: true
                     });
 
+                    if (this.nowPlayerCounter > this.playerList.length) {
+                        this.nowPlayerCounter = 0;
+                    }
+
+                    this.nowPlayerCounter++;
+
 
 
 
@@ -308,9 +379,7 @@
                     //     this.nowPlayerCounter = 0;
                     // }
 
-                    // firebase.database().ref('nowPlayerCounter/room1').set({
-                    //     count: this.nowPlayerCounter,
-                    // });
+                    
 
 
 
@@ -319,9 +388,41 @@
                 }
             },
             mounted() {
+                
+                this.socketio.on("connected", function (sender) {
+                    console.log(sender);
+                 });
+                // this.socketio.on("publish", function (data) {
+                //     this.sendJoin("sender" + 'さんが参加しました．');
+                //     console.log("334");
+                // });
+                // firebase.database().ref('nowPlayer/room1').set({ name: '未定' });
+                // this.socketio.on('getCount', function(num){
+                //         console.log(num);
+                //         this.nowPlayerCounter = num;
+                //     });
 
+                
+                
+                // this.socketio.on("sendCount", function (data) {});
+                // this.socketio.on("getCount",(num) =>{
+                //     console.log(num);
+                //         this.nowPlayerCounter = num;
+                // });
 
-            }
+                
+
+                this.socketio.on("disconnect", function () { });
+
+                this.socketio.on("info", function () {
+
+                });
+
+                setTimeout(() => {
+                    this.isLoading = false
+                    }, 1000)
+                },
+
         })
     </script>
 

@@ -61,8 +61,14 @@ io.sockets.on("connection", function (socket) {
 
   socket.on("getCount", function (data) {
     // io.sockets.emit("publish", { value: data.value });
-    userCount = data;
     console.log(data);
+    userCount = data;
+    userCount++;
+    if(userCount >= userList.length){
+      userCount = 0;
+    }
+    console.log(userCount);
+    socket.emit("getCount", userCount);
   });
 
   socket.on("sendCount", function (data) {
