@@ -29,10 +29,27 @@ var userSet = {};
 var userList = [];
 var count = 0;
 var userCount = 0;
+var draws = [];
 
 // 接続されたら、connected!とコンソールにメッセージを表示します。
 io.sockets.on("connection", function (socket) {
   // console.log("connected");
+  // console.log(draws);
+  if (draws.length > 0) {
+    socket.emit('firstsend', draws);
+  }
+
+  // クライアントからメッセージ受信
+  socket.on('clearsend', function () {
+    console.log("delete");
+    draws = [];
+    // 自分以外の全員に送る
+    socket.broadcast.emit("delete");
+
+    // 描画情報クリア
+
+  });
+
 
   //接続したとき（入室したとき）
   socket.on("connected", function (sender) {
@@ -86,13 +103,16 @@ io.sockets.on("connection", function (socket) {
   });
 
   //ここから下がとりあえずコピペした絵を描くやつのサーバ側
+  // 接続時、描画情報があれば送信
 
   // 描画情報がクライアントから渡されたら、接続中の他ユーザーへ
   // broadcastで描画情報を送ります。
   // ちなみに、最近のsocket.IOでは、イベント名(以下だとdraw)は
   // 自由にネーミング出来るようになったようです。便利！！
   socket.on("draw", function (data) {
-    console.log(data);
+    // console.log(data);
+    draws.push(data);
+    // console.log(draws);
     socket.broadcast.emit("draw", data);
   });
 

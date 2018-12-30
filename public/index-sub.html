@@ -5,7 +5,7 @@
     <!-- <link href="../../NetProApp/public/canvas.css" rel="stylesheet" type="text/css">-->
 
     <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
@@ -16,110 +16,166 @@
         });
     </script>
     <script src="/socket.io/socket.io.js"></script>
-    <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 
     <title>チャットするページ</title>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
 
+        body {}
+
+        .title {
+            padding: 10px;
+        }
+
+        .main {
+            padding-left: 10px;
+            margin: auto;
+        }
+
+        .toolbar {}
+
+        .toolbar li {
+            width: 44px;
+            height: 44px;
+            margin: auto;
+            list-style-type: none;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin: 10px;
+            display: block;
+            float: left;
+        }
+
+        #black {
+            background-color: black;
+        }
+
+        #red {
+            background-color: red;
+        }
+
+        #green {
+            background-color: green;
+        }
+
+        #blue {
+            background-color: blue;
+        }
+
+        #small {
+            text-align: center;
+            line-height: 44px;
+            font-size: 100%;
+        }
+
+        #middle {
+            text-align: center;
+            line-height: 44px;
+            font-size: 200%;
+        }
+
+        #large {
+            text-align: center;
+            line-height: 44px;
+            font-size: 300%;
+        }
+
+        .canvas {
+            padding-left: 50px;
+            width: 80%;
+            height: 400px;
+            border: 1px solid #ccc;
+        }
+
+        .canvas canvas {
+            width: 600px;
+            height: 400px;
+        }
+
+        div.chat {
+            float: right;
+            width: 40%;
+        }
+
+        div.canvasSide {
+            float: left;
+            width: 60%;
+        }
+    </style>
 </head>
 
 <body>
     <div id="app">
-        <div class='area'>
-            <div>
-                <div class="chat">
-                    <div>{{sender}}さん</div>
-                    <!-- <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div> -->
-                    <label for="nameInput">メッセージ</label>
-                    <input type="txt" id="nameInput" v-model="message">
+        <div>
+            <div class="chat">
+                <div>{{sender}}さん</div>
+                <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div>
+                <label for="nameInput">メッセージ</label>
+                <input type="txt" id="nameInput" v-model="message">
 
 
-                    <div>
-                        <button @click="join">
-                            参加する
-                        </button>
-                    </div>
-                    <div>
-                        <button @click="sendMessage">
-                            送信
-                        </button>
-                    </div>
-                    <div>
-                        <button @click="nextUser">
-                            ゲームを開始
-                        </button>
-                    </div>
-                    <div>
-                        <button :disabled="isCantPushButton" @click="nextUser">
-                            <!-- :disabled="isCantPushButton" で　isCantPushButtonがtrueの時押せない -->
-                            次の人へ
-                        </button>
-                    </div>
-                    <div>
-                        <button @click="removeMessage">
-                            メッセージをすべて削除
-                        </button>
-                    </div>
-
-                    <button :disabled="isCantPushButton" @click="test">自分のターンじゃないと押せない</button>
-
-                    <div>
-                        <ul>
-                            <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
-                        </ul>
-                    </div>
-
+                <div>
+                    <button @click="join">
+                        参加する
+                    </button>
+                </div>
+                <div>
+                    <button @click="sendMessage">
+                        送信
+                    </button>
+                </div>
+                <div>
+                    <button @click="nextUser">
+                        ゲームを開始
+                    </button>
+                </div>
+                <div>
+                    <button :disabled="isCantPushButton" @click="nextUser">
+                        <!-- :disabled="isCantPushButton" で　isCantPushButtonがtrueの時押せない -->
+                        次の人へ
+                    </button>
+                </div>
+                <div>
+                    <button @click="removeMessage">
+                        メッセージをすべて削除
+                    </button>
                 </div>
 
-                <!-- ここのタグの中にとりあえずキャンバスを実装して -->
-                <div class="canvasSide">
-                    <div class="header">
-                        <div>{{nowPlayer}}さんのターンです</div>
-                    </div>
+                <button :disabled="isCantPushButton" @click="test">自分のターンじゃないと押せない</button>
 
+                <div>
+                    <ul>
+                        <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- ここのタグの中にとりあえずキャンバスを実装して -->
+            <div class="canvasSide">
+                <div>
+                    <div style="clear:left;"></div>
+                    <div class="toolbar">
+                        <ul>
+                            <li id="black"> </li>
+                            <li id="blue"></li>
+                            <li id="red"></li>
+                            <li id="green"></li>
+                            <li id="small">S</li>
+                            <li id="middle">M</li>
+                            <li id="large">L</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <div style="clear:left;"></div>
                     <div class="canvas">
                         <canvas id="myCanvas"></canvas>
-                        <div class="toolbar">
-                            <div class="colors">
-                                <div class="color" id="black"></div>
-                                <div class="color" id="red"></div>
-                                <div class="color" id="blue"></div>
-                                <div class="color" id="green"></div>
-                                <div class="color" id="yellow"></div>
-                                <div class="color" id="pink"></div>
-                                <div class="color" id="orange"></div>
-                                <div class="color" id="purple"></div>
-                                <div class="color" id="skyblue"></div>
-                                <div class="color" id="brown"></div>
-                                <div class="color" id="silver"></div>
-                                <div class="color" id="white"></div>
-
-                            </div>
-                            <div class="lines">
-                                <div id="smallBox">
-                                    <div id="small">
-
-                                    </div>
-                                </div>
-                                <div id="middleBox">
-                                    <div id="middle">
-
-                                    </div>
-                                </div>
-                                <div id="largeBox">
-                                    <div id="large">
-
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <button id="allDeleteButton">全消し</button>
-                            </div>
-                        </div>
-
                     </div>
-
-
-
                 </div>
             </div>
         </div>
@@ -138,8 +194,6 @@
                 message: '', // チャットの内容
                 nameList: [], //参加者一覧の配列
                 socketio: '', //そけっとあいおー
-                canvas: document.getElementById("myCanvas"),
-                context: document.getElementById("myCanvas").getContext("2d"),
             },
             watch: {
                 nowPlayer: {
@@ -154,7 +208,6 @@
                 this.getMessageFromDB();
                 this.getNowPlayer();
                 this.setNowPlayerCounter();
-
             },
 
             methods: {
@@ -176,7 +229,6 @@
                             this.nowPlayerCounter = nowPlayerCounter;
                         }
                     })
-
                 },
 
                 turnCounter() {//ターンの計算　未定の時はスルーしないと0から始まれない
@@ -304,13 +356,11 @@
                 this.socketio.on("disconnect", function () { });
                 this.socketio.on("info", function () {
                 });
-
             },
         })
     </script>
     <script type="text/javascript">
         window.addEventListener("load", function () {
-            console.log('334')
 
             // サーバーサイドのsocket.IOに接続する
             // 接続出来たら、サーバー側のコンソールにconnected!と表示される
@@ -318,7 +368,7 @@
 
             // Canvas描画に必要な変数を定義する
             var canvas = document.getElementById("myCanvas");
-            var context = canvas.getContext("2d");
+            var c = canvas.getContext("2d");
             var w = 650;
             var h = 400;
             var drawing = false;
@@ -327,10 +377,10 @@
             // Canvasを初期化する
             canvas.width = w;
             canvas.height = h;
-            context.strokeStyle = "#000000";
-            context.lineWidth = 5;
-            context.lineJoin = "round";
-            context.lineCap = "round";
+            c.strokeStyle = "#000000";
+            c.lineWidth = 5;
+            c.lineJoin = "round";
+            c.lineCap = "round";
 
             // Canvas上の座標を計算する為の関数たち
             function scrollX() {
@@ -364,74 +414,50 @@
                 var pos = getPos(event);
                 console.log("mousemove : x=" + pos.x + ", y=" + pos.y + ", drawing=" + drawing);
                 if (drawing) {
-                    context.beginPath();
-                    context.moveTo(oldPos.x, oldPos.y);
-                    context.lineTo(pos.x, pos.y);
-                    context.stroke();
-                    context.closePath();
+                    c.beginPath();
+                    c.moveTo(oldPos.x, oldPos.y);
+                    c.lineTo(pos.x, pos.y);
+                    c.stroke();
+                    c.closePath();
 
                     // socket.IOサーバーに、
                     // どの点からどの点までを描画するかをの情報を送付する
-                    socket.emit("draw", { before: oldPos, after: pos, color: context.strokeStyle, line: context.lineWidth });
+                    socket.emit("draw", { before: oldPos, after: pos });
                     oldPos = pos;
                 }
             }, false);
             canvas.addEventListener("mouseout", function () {
-                // console.log("mouseout");
+                console.log("mouseout");
                 drawing = false;
             }, false);
 
             // 色や太さを選択した場合の処理
             // 選択した結果を、Canvasに設定して、
             // socket.IOサーバーにも送付している
-            $("#black").click(function () { context.strokeStyle = "black"; socket.emit("color", "black"); });
-            $("#blue").click(function () { context.strokeStyle = "blue"; socket.emit("color", "blue"); });
-            $("#red").click(function () { context.strokeStyle = "red"; socket.emit("color", "red"); });
-            $("#green").click(function () { context.strokeStyle = "green"; socket.emit("color", "green"); });
-            $("#smallBox").click(function () { context.lineWidth = 5; socket.emit("lineWidth", 5); });
-            $("#middleBox").click(function () { context.lineWidth = 7; socket.emit("lineWidth", 10); });
-            $("#largeBox").click(function () { context.lineWidth = 10; socket.emit("lineWidth", 20); });
+            $("#black").click(function () { c.strokeStyle = "black"; socket.emit("color", "black"); });
+            $("#blue").click(function () { c.strokeStyle = "blue"; socket.emit("color", "blue"); });
+            $("#red").click(function () { c.strokeStyle = "red"; socket.emit("color", "red"); });
+            $("#green").click(function () { c.strokeStyle = "green"; socket.emit("color", "green"); });
+            $("#small").click(function () { c.lineWidth = 5; socket.emit("lineWidth", 5); });
+            $("#middle").click(function () { c.lineWidth = 10; socket.emit("lineWidth", 10); });
+            $("#large").click(function () { c.lineWidth = 20; socket.emit("lineWidth", 20); });
 
-            $("#allDeleteButton").click(function () {
-                console.log("72");
-                socket.emit('clearsend');
-                context.clearRect(0, 0, w, h);
-            });
-
-            socket.on('firstsend', function (msg) {
-                // console.log(msg);
-                for (key in msg) {
-                    // console.log(key);
-                    context.strokeStyle = msg[key].color;
-                    context.lineWidth = msg[key].line;
-                    context.beginPath();
-                    context.moveTo(msg[key].before.x, msg[key].before.y);
-                    context.lineTo(msg[key].after.x, msg[key].after.y);
-                    context.stroke();
-                    context.closePath();
-                }
-            });
             // socket.IOサーバーから描画情報を受け取った場合の処理
             // 受け取った情報を元に、Canvasに描画を行う
             socket.on("draw", function (data) {
                 console.log("on draw : " + data);
-                context.beginPath();
-                context.moveTo(data.before.x, data.before.y);
-                context.lineTo(data.after.x, data.after.y);
-                context.stroke();
-                context.closePath();
+                c.beginPath();
+                c.moveTo(data.before.x, data.before.y);
+                c.lineTo(data.after.x, data.after.y);
+                c.stroke();
+                c.closePath();
             });
 
             // socket.IOサーバーから色情報を受け取った場合の処理
             // Canvasに色を設定している
             socket.on("color", function (data) {
                 console.log("on color : " + data);
-                context.strokeStyle = data;
-            });
-
-            socket.on("delete", function () {
-                console.log("clearRect");
-                context.clearRect(0, 0, w, h);
+                c.strokeStyle = data;
             });
 
 
@@ -439,236 +465,14 @@
             // Canvasに線の太さを設定している
             socket.on("lineWidth", function (data) {
                 console.log("on lineWidth : " + data);
-                context.lineWidth = data;
+                c.lineWidth = data;
             });
-
-
-
-
 
 
         }, false);
 
 
-        // function allDelete() {
-        //     console.log("72");
-        //     socket.on('clearsend', function () { }
-        //     );
-        // }
-
     </script>
-
-    <style scoped>
-        * {
-            margin: 0px;
-            padding: 0px;
-        }
-
-        body {}
-
-        .title {
-            padding: 10px;
-        }
-
-        .main {
-            padding-left: 10px;
-            margin: auto;
-        }
-
-        .toolbar {}
-
-        /* .toolbar li {
-            width: 44px;
-            height: 44px;
-            margin: auto;
-            list-style-type: none;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            margin: 10px;
-            display: block;
-            float: left;
-        } */
-
-        #black {
-            background-color: black;
-        }
-
-        #red {
-            background-color: red;
-        }
-
-        #green {
-            background-color: green;
-        }
-
-        #blue {
-            background-color: blue;
-        }
-
-        #yellow {
-            background-color: yellow;
-        }
-
-        #pink {
-            background-color: pink;
-        }
-
-        #orange {
-            background-color: orange;
-        }
-
-        #purple {
-            background-color: purple;
-        }
-
-        #skyblue {
-            background-color: skyblue;
-        }
-
-        #brown {
-            background-color: brown;
-        }
-
-        #white {
-            background-color: white;
-        }
-
-        #silver {
-            background-color: silver;
-        }
-
-        #small {
-            text-align: center;
-            line-height: 44px;
-            font-size: 100%;
-        }
-
-        #middle {
-            text-align: center;
-            line-height: 44px;
-            font-size: 200%;
-        }
-
-        #large {
-            text-align: center;
-            line-height: 44px;
-            font-size: 300%;
-        }
-
-        #myCanvas {
-            width: 650px;
-            height: 400px;
-            border: 1px solid #ccc;
-        }
-
-        /* .canvas canvas {
-
-            width: 650px;
-            height: 400px;
-        } */
-
-        #area {
-            text-align: center;
-        }
-
-        .chat {
-            padding-top: 5%;
-            float: right;
-            width: 40%;
-        }
-
-        .canvasSide {
-            padding-top: 5%;
-            padding-left: 5%;
-            float: left;
-            width: 55%;
-            /* margin: 0 auto; */
-            text-align: left;
-        }
-
-        .canvas {
-            float: left;
-            /* margin: 0 10px; */
-        }
-
-        .toolbar {
-            float: right;
-            /* float: right; */
-            /* width: 50%; */
-
-        }
-
-        .colors {
-
-            width: 100px;
-            /* background: #999; */
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .color {
-            width: 50%;
-            box-sizing: border-box;
-            /* width: 44px; */
-            height: 44px;
-            /* margin: auto; */
-            list-style-type: none;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            /* margin: 10px; */
-            /* display: block; */
-            /* float: right; */
-        }
-
-        .lines {
-            padding-top: 10px;
-        }
-
-        #smallBox {
-            width: 100%;
-            height: 30px;
-            border: 1px solid #ccc;
-        }
-
-        #middleBox {
-            width: 100%;
-            height: 30px;
-            border: 1px solid #ccc;
-        }
-
-        #largeBox {
-            width: 100%;
-            height: 30px;
-            border: 1px solid #ccc;
-        }
-
-        #small {
-            width: 10px;
-            height: 10px;
-            border-radius: 10px 10px 10px 10px;
-            background-color: black;
-            margin-left: 45%;
-            margin-top: 10px;
-        }
-
-        #middle {
-            width: 14px;
-            height: 14px;
-            border-radius: 10px 10px 10px 10px;
-            background-color: black;
-            margin-left: 43%;
-            margin-top: 8px;
-        }
-
-        #large {
-            width: 20px;
-            height: 20px;
-            border-radius: 20px 20px 20px 20px;
-            background-color: black;
-            margin-left: 40%;
-            margin-top: 5px;
-        }
-    </style>
 
 
 
