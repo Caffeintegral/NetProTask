@@ -112,7 +112,7 @@
                                 </div>
                             </div>
                             <div>
-                                <button id="allDeleteButton">全消し</button>
+                                <input type="button" id="allDeleteButton" value="全消し">
                             </div>
                         </div>
 
@@ -138,8 +138,8 @@
                 message: '', // チャットの内容
                 nameList: [], //参加者一覧の配列
                 socketio: '', //そけっとあいおー
-                canvas: document.getElementById("myCanvas"),
-                context: document.getElementById("myCanvas").getContext("2d"),
+                canvasClick: document.getElementById("myCanvas"),
+
             },
             watch: {
                 nowPlayer: {
@@ -223,10 +223,15 @@
                         console.log("あなたのターンです");
                         this.isCantPushButton = false;
                         this.isNowPlayer = true;
+                        document.getElementById("myCanvas").style.pointerEvents = "auto";
+                        document.getElementById("allDeleteButton").disabled = "";
+
                     } if (this.nowPlayer != this.sender) {
                         console.log(this.nowPlayer + "さんのターンです");
                         this.isCantPushButton = true;
                         this.isNowPlayer = false;
+                        document.getElementById("myCanvas").style.pointerEvents = "none";
+                        document.getElementById("allDeleteButton").disabled = "disabled";
                     }
                 },
 
@@ -559,6 +564,7 @@
             width: 650px;
             height: 400px;
             border: 1px solid #ccc;
+
         }
 
         /* .canvas canvas {
