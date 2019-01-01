@@ -44,23 +44,20 @@
                         </button>
                     </div>
                     <div>
-                        <button @click="nextUser">
+                        <button :disabled="isPlaying" @click="gameStart">
                             ゲームを開始
                         </button>
                     </div>
-                    <div>
+                    <!-- <div>
                         <button :disabled="isCantPushButton" @click="nextUser">
-                            <!-- :disabled="isCantPushButton" で　isCantPushButtonがtrueの時押せない -->
                             次の人へ
                         </button>
-                    </div>
+                    </div> -->
                     <div>
                         <button @click="removeMessage">
                             メッセージをすべて削除
                         </button>
                     </div>
-
-                    <button :disabled="isCantPushButton" @click="test">自分のターンじゃないと押せない</button>
 
                     <div>
                         <ul>
@@ -73,7 +70,7 @@
                 <!-- ここのタグの中にとりあえずキャンバスを実装して -->
                 <div class="canvasSide">
                     <div class="header">
-                        <div>{{nowPlayer}}さんのターンです</div>
+                        <div>{{nowPlayer}}さんのターンです 答え{{beforeAnswer}}</div>
                     </div>
 
                     <div class="canvas">
@@ -114,6 +111,15 @@
                             <div>
                                 <input type="button" id="allDeleteButton" value="全消し">
                             </div>
+
+                            <div>
+                                <input type="txt" id="answer" :disabled="isCantPushButton" v-model="answer">
+                            </div>
+                            <div>
+                                <button :disabled="isCantPushButton" @click="nextUser">
+                                    送信
+                                </button>
+                            </div>
                         </div>
 
                     </div>
@@ -135,8 +141,11 @@
                 nowPlayerCounter: 0, //誰のターンなのか数値でカウントしてる
                 isNowPlayer: false, // 今ターンか
                 isCantPushButton: true, //ボタン押せるか
+                isPlaying: true,
                 message: '', // チャットの内容
                 nameList: [], //参加者一覧の配列
+                answer: '',
+                beforeAnswer: '',
                 socketio: '', //そけっとあいおー
                 canvasClick: document.getElementById("myCanvas"),
 
@@ -147,7 +156,13 @@
                         this.nowPlayerFlag();
                     },
                     deep: true
-                }
+                },
+                nameList: {
+                    handler: function (val, oldVal) { //nowPlayerの値が変更されたとき==ターンが移ったとき
+                        this.isPlaying = false
+                    },
+                    deep: true
+                },
             },
             created() {
                 this.socketio = io();
@@ -216,9 +231,21 @@
                             this.nowPlayer = nowPlayer;
                         }
                     })
+                    firebase.database().ref('beforeAnswer/room1/').on('value', snapshot => {
+                        if (snapshot) {
+                            const rootList = snapshot.val();
+                            let beforeAnswer = "";
+                            Object.keys(rootList).forEach((val, key) => {
+                                rootList[val].id = val;
+                                beforeAnswer = rootList[val];
+                            })
+                            this.beforeAnswer = beforeAnswer;
+                        }
+                    })
                 },
 
                 nowPlayerFlag() { //今自分のターンなのかの判定
+                    this.isPlaying = true;
                     if (this.nowPlayer == this.sender) {
                         console.log("あなたのターンです");
                         this.isCantPushButton = false;
@@ -251,6 +278,9 @@
                         sender: this.sender,
                         message: this.message
                     })
+                    if (this.message == 'alldelete') {
+                        this.removeMessage()
+                    }
                     this.message = ''
                 },
 
@@ -288,6 +318,37 @@
                 },
 
                 nextUser() { //次へボタンを押したとき　DBに今誰のターンなのかを投げ，カウントも投げてる
+
+                    if (this.beforeAnswer.slice(-1) == this.answer.slice(0, 1) || this.beforeAnswer == "") {
+                        this.turnCounter();
+
+                        this.nowPlayer = this.nameList[this.nowPlayerCounter];
+
+                        firebase.database().ref('nowPlayer/room1').set({
+                            name: this.nowPlayer,
+                            isNowPlayer: true
+                        });
+
+                        firebase.database().ref('nowPlayerCounter/room1').set({
+                            count: this.nowPlayerCounter,
+                        });
+
+
+                        this.beforeAnswer = this.answer
+                        firebase.database().ref('beforeAnswer/room1/').set({
+                            beforeAnswer: this.beforeAnswer
+                        })
+
+                        this.answer = '';
+
+                    }
+
+
+
+                },
+
+                gameStart() { //次へボタンを押したとき　DBに今誰のターンなのかを投げ，カウントも投げてる
+
                     this.turnCounter();
 
                     this.nowPlayer = this.nameList[this.nowPlayerCounter];
@@ -300,7 +361,13 @@
                     firebase.database().ref('nowPlayerCounter/room1').set({
                         count: this.nowPlayerCounter,
                     });
-                }
+
+                    firebase.database().ref('messages/room1/').push({
+                        sender: 'システム',
+                        message: 'ゲーム開始です！ 「しりとり」の「り」から！'
+                    })
+                },
+
             },
             mounted() {
                 this.socketio.on("connected", function (sender) { //おまじない
@@ -393,6 +460,14 @@
             $("#blue").click(function () { context.strokeStyle = "blue"; socket.emit("color", "blue"); });
             $("#red").click(function () { context.strokeStyle = "red"; socket.emit("color", "red"); });
             $("#green").click(function () { context.strokeStyle = "green"; socket.emit("color", "green"); });
+            $("#yellow").click(function () { context.strokeStyle = "yellow"; socket.emit("color", "yellow"); });
+            $("#pink").click(function () { context.strokeStyle = "pink"; socket.emit("color", "pink"); });
+            $("#orange").click(function () { context.strokeStyle = "orange"; socket.emit("color", "orange"); });
+            $("#purple").click(function () { context.strokeStyle = "purple"; socket.emit("color", "purple"); });
+            $("#skyblue").click(function () { context.strokeStyle = "skyblue"; socket.emit("color", "skyblue"); });
+            $("#brown").click(function () { context.strokeStyle = "brown"; socket.emit("color", "brown"); });
+            $("#silver").click(function () { context.strokeStyle = "silver"; socket.emit("color", "silver"); });
+            $("#white").click(function () { context.strokeStyle = "white"; socket.emit("color", "white"); });
             $("#smallBox").click(function () { context.lineWidth = 5; socket.emit("lineWidth", 5); });
             $("#middleBox").click(function () { context.lineWidth = 7; socket.emit("lineWidth", 10); });
             $("#largeBox").click(function () { context.lineWidth = 10; socket.emit("lineWidth", 20); });
@@ -455,11 +530,6 @@
         }, false);
 
 
-        // function allDelete() {
-        //     console.log("72");
-        //     socket.on('clearsend', function () { }
-        //     );
-        // }
 
     </script>
 

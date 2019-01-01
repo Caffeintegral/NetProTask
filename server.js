@@ -11,6 +11,7 @@ admin.initializeApp({
 });
 
 var db = admin.database();
+var messages = db.ref('messages/'); //データベースの階層
 var messageRef = db.ref('messages/room1/'); //データベースの階層
 var usersRef = db.ref('users/room1/'); //データベースの階層
 
@@ -87,6 +88,7 @@ io.sockets.on("connection", function (socket) {
       delete userHash[socket.id];
       console.log(userList);
       console.log(msg);
+
     }
 
     if (userList.length == 0) { //誰もいなくなったとき部屋消してる（正確には誰もいなくなった後誰かがアクセスしたとき）
@@ -98,6 +100,9 @@ io.sockets.on("connection", function (socket) {
       db.ref('nowPlayerCounter/room1').set({
         count: 0,
       });
+      db.ref('beforeAnswer/room1/').set({
+        beforeAnswer: "しりとり"
+      })
     }
 
   });
