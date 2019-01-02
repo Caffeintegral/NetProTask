@@ -124,6 +124,14 @@
 
                     </div>
 
+                    <div>
+                        <button @click="chgIMG">
+                            送信
+                        </button>
+                    </div>
+
+                    <!-- <div><img id="newImg"></div> -->
+                    <img :src="image">
 
 
                 </div>
@@ -147,7 +155,9 @@
                 answer: '',
                 beforeAnswer: '',
                 socketio: '', //そけっとあいおー
-                canvasClick: document.getElementById("myCanvas"),
+                image:"",
+                canvasArea: document.getElementById("myCanvas"),
+                
 
             },
             watch: {
@@ -367,6 +377,11 @@
                         message: 'ゲーム開始です！ 「しりとり」の「り」から！'
                     })
                 },
+
+                chgIMG(){
+                    var img = document.getElementById("myCanvas").toDataURL('image/png');
+                    document.getElementById("newImg").src = img;
+                }
 
             },
             mounted() {
