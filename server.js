@@ -103,6 +103,9 @@ io.sockets.on("connection", function (socket) {
       db.ref('beforeAnswer/room1/').set({
         beforeAnswer: "しりとり"
       })
+      db.ref('img/room1/').set({
+        imgUrl: ""
+      })
     }
 
   });

@@ -16,6 +16,7 @@
         });
     </script>
     <script src="/socket.io/socket.io.js"></script>
+
     <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> -->
 
     <title>チャットするページ</title>
@@ -121,23 +122,11 @@
                                 </button>
                             </div>
                         </div>
-
+                        <div><img id="lastCanvas"></div>
                     </div>
-
-                    <div>
-                        <button @click="chgIMG">
-                            送信
-                        </button>
-                    </div>
-
-                    <!-- <div><img id="newImg"></div> -->
-                    <img :src="image">
-
-
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <script>
         new Vue({
@@ -155,30 +144,42 @@
                 answer: '',
                 beforeAnswer: '',
                 socketio: '', //そけっとあいおー
-                image:"",
-                canvasArea: document.getElementById("myCanvas"),
-                
+                image: "",
+
+
 
             },
             watch: {
                 nowPlayer: {
                     handler: function (val, oldVal) { //nowPlayerの値が変更されたとき==ターンが移ったとき
                         this.nowPlayerFlag();
+                        this.getLastCanvas();
+                        if (this.nowPlayer == '未定') {
+                            document.getElementById("myCanvas").style.pointerEvents = "auto";
+                            document.getElementById("allDeleteButton").disabled = "";
+                        }
+
+
                     },
                     deep: true
                 },
-                nameList: {
-                    handler: function (val, oldVal) { //nowPlayerの値が変更されたとき==ターンが移ったとき
-                        this.isPlaying = false
-                    },
-                    deep: true
-                },
+                // nameList: {
+                //     handler: function (val, oldVal) {
+                //         if (!isPlaying) {
+                //             document.getElementById("myCanvas").style.pointerEvents = "auto";
+                //             document.getElementById("allDeleteButton").disabled = "";
+                //         }
+
+                //     },
+                //     deep: true
+                // },
             },
             created() {
                 this.socketio = io();
                 this.getMessageFromDB();
                 this.getNowPlayer();
                 this.setNowPlayerCounter();
+
 
             },
 
@@ -226,6 +227,22 @@
                             this.list = list;
                         }
                     })
+                    this.getLastCanvas();
+                },
+
+                getLastCanvas() {
+                    firebase.database().ref('img/room1/').on('value', snapshot => {
+                        if (snapshot) {
+                            const rootList = snapshot.val();
+                            let imgUrl = "";
+                            Object.keys(rootList).forEach((val, key) => {
+                                rootList[val].id = val;
+                                imgUrl = rootList[val];
+                            })
+                            this.imgUrl = imgUrl;
+                        }
+                    })
+                    document.getElementById("lastCanvas").src = this.imgUrl;
 
                 },
 
@@ -320,6 +337,7 @@
                     else {
                         window.alert('キャンセルされました');
                     }
+                    this.isPlaying = false
 
                 },
 
@@ -330,6 +348,11 @@
                 nextUser() { //次へボタンを押したとき　DBに今誰のターンなのかを投げ，カウントも投げてる
 
                     if (this.beforeAnswer.slice(-1) == this.answer.slice(0, 1) || this.beforeAnswer == "") {
+                        var img = document.getElementById("myCanvas").toDataURL();
+                        console.log(img);
+                        firebase.database().ref('img/room1').set({
+                            imgUrl: img,
+                        });
                         this.turnCounter();
 
                         this.nowPlayer = this.nameList[this.nowPlayerCounter];
@@ -350,11 +373,7 @@
                         })
 
                         this.answer = '';
-
                     }
-
-
-
                 },
 
                 gameStart() { //次へボタンを押したとき　DBに今誰のターンなのかを投げ，カウントも投げてる
@@ -378,10 +397,7 @@
                     })
                 },
 
-                chgIMG(){
-                    var img = document.getElementById("myCanvas").toDataURL('image/png');
-                    document.getElementById("newImg").src = img;
-                }
+
 
             },
             mounted() {
@@ -391,6 +407,7 @@
                 this.socketio.on("disconnect", function () { });
                 this.socketio.on("info", function () {
                 });
+
 
             },
         })
@@ -484,8 +501,8 @@
             $("#silver").click(function () { context.strokeStyle = "silver"; socket.emit("color", "silver"); });
             $("#white").click(function () { context.strokeStyle = "white"; socket.emit("color", "white"); });
             $("#smallBox").click(function () { context.lineWidth = 5; socket.emit("lineWidth", 5); });
-            $("#middleBox").click(function () { context.lineWidth = 7; socket.emit("lineWidth", 10); });
-            $("#largeBox").click(function () { context.lineWidth = 10; socket.emit("lineWidth", 20); });
+            $("#middleBox").click(function () { context.lineWidth = 7; socket.emit("lineWidth", 7); });
+            $("#largeBox").click(function () { context.lineWidth = 10; socket.emit("lineWidth", 10); });
 
             $("#allDeleteButton").click(function () {
                 console.log("72");
@@ -652,6 +669,13 @@
 
         }
 
+        #lastCanvas {
+            border: solid 1px #ccc;
+            width: 650px;
+            height: 400px;
+
+        }
+
         /* .canvas canvas {
 
             width: 650px;
@@ -747,7 +771,7 @@
             height: 14px;
             border-radius: 10px 10px 10px 10px;
             background-color: black;
-            margin-left: 43%;
+            margin-left: 43.5%;
             margin-top: 8px;
         }
 
@@ -756,7 +780,7 @@
             height: 20px;
             border-radius: 20px 20px 20px 20px;
             background-color: black;
-            margin-left: 40%;
+            margin-left: 42%;
             margin-top: 5px;
         }
     </style>
