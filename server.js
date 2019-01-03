@@ -6,15 +6,7 @@ var fs = require("fs");
 var admin = require('firebase-admin');
 var serviceAccount = require('../FirebaseAdminSDK_netPro.json'); //秘密鍵　抜かれたらやばいやつ
 
-app.use(function (req, res, next) {
-
-  if (req.originalUrl && req.originalUrl.split("/").pop() === 'favicon.ico') {
-    return res.sendStatus(204);
-  }
-
-  return next();
-
-});
+app.get('/favicon.ico', (req, res) => res.status(204));
 //データベースの定義
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
