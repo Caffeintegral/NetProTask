@@ -6,6 +6,17 @@ var fs = require("fs");
 var admin = require('firebase-admin');
 var serviceAccount = require('../FirebaseAdminSDK_netPro.json'); //秘密鍵　抜かれたらやばいやつ
 
+
+function ignoreFavicon(req, res, next) {
+  if (req.originalUrl === '/favicon.ico') {
+    res.status(204).json({ nope: true });
+  } else {
+    next();
+  }
+}
+
+app.use(ignoreFavicon);
+
 //データベースの定義
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -146,12 +157,3 @@ io.sockets.on("connection", function (socket) {
 
 });
 
-function ignoreFavicon(req, res, next) {
-  if (req.originalUrl === '/favicon.ico') {
-    res.status(204).json({ nope: true });
-  } else {
-    next();
-  }
-}
-
-app.use(ignoreFavicon);
