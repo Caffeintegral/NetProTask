@@ -1,3 +1,5 @@
+var express = require("express");
+var app = express();
 var http = require("http");
 var socketIO = require("socket.io");
 var fs = require("fs");
@@ -144,3 +146,12 @@ io.sockets.on("connection", function (socket) {
 
 });
 
+function ignoreFavicon(req, res, next) {
+  if (req.originalUrl === '/favicon.ico') {
+    res.status(204).json({ nope: true });
+  } else {
+    next();
+  }
+}
+
+app.use(ignoreFavicon);
