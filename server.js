@@ -13,15 +13,19 @@ admin.initializeApp({
   databaseURL: "https://netpro-3c4a0.firebaseio.com/" //データベースのURL
 });
 
+app.use('/public', express.static('public'));
+
 var db = admin.database();
 var messages = db.ref('messages/'); //データベースの階層
 var messageRef = db.ref('messages/room1/'); //データベースの階層
 var usersRef = db.ref('users/room1/'); //データベースの階層
 
 var server = http.createServer(function (req, res) {
-  res.writeHead(200, { "Content-Type": "text/html" });
-  var output = fs.readFileSync("./public/index.html", "utf-8");
-  res.end(output);
+      res.writeHead(200, { "Content-Type": "text/html" });
+      var output = fs.readFileSync("./public/index.html", "utf-8");
+      res.end(output);
+
+
 });
 console.log('listening on localhost:3000');
 server.listen(3000);
@@ -43,7 +47,6 @@ io.sockets.on("connection", function (socket) {
     socket.emit('firstsend', draws);
   }
 
-  // クライアントからメッセージ受信
   socket.on('clearsend', function () {
     console.log("delete");
     draws = [];
@@ -113,13 +116,7 @@ io.sockets.on("connection", function (socket) {
 
   });
 
-  //ここから下がとりあえずコピペした絵を描くやつのサーバ側
-  // 接続時、描画情報があれば送信
 
-  // 描画情報がクライアントから渡されたら、接続中の他ユーザーへ
-  // broadcastで描画情報を送ります。
-  // ちなみに、最近のsocket.IOでは、イベント名(以下だとdraw)は
-  // 自由にネーミング出来るようになったようです。便利！！
   socket.on("draw", function (data) {
     // console.log(data);
     draws.push(data);
@@ -127,15 +124,13 @@ io.sockets.on("connection", function (socket) {
     socket.broadcast.emit("draw", data);
   });
 
-  // 色変更情報がクライアントからきたら、
-  // 他ユーザーへ変更後の色を通知します。
+
   socket.on("color", function (color) {
     console.log(color);
     socket.broadcast.emit("color", color);
   });
 
-  // 線の太さの変更情報がクライアントからきたら、
-  // 他ユーザーへ変更後の線の太さを通知します。
+
   socket.on("lineWidth", function (width) {
     console.log(width);
     socket.broadcast.emit("lineWidth", width);

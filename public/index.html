@@ -2,7 +2,6 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <!-- <link href="../../NetProApp/public/canvas.css" rel="stylesheet" type="text/css">-->
 
     <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -16,29 +15,29 @@
         });
     </script>
     <script src="/socket.io/socket.io.js"></script>
-
-    <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> -->
-
     <title>チャットするページ</title>
-
 </head>
 
 <body>
     <div id="app">
         <div class='area'>
+            <div id="header">
+
+            </div>
             <div id="mainArea">
                 <!-- ここのタグの中にとりあえずキャンバスを実装して -->
 
 
                 <div class="canvas">
                     <div id="canvases">
-                        <div class="header">
-                            <div>{{nowPlayer}}さんのターンです 答え{{beforeAnswer}}</div>
+                        <div class="title">
+                            <div>{{nowPlayer}}さんのターンです </div>
+                            <div>//デバック用　答え{{beforeAnswer}}</div>
                         </div>
 
                         <canvas id="myCanvas"></canvas>
                         <div class="toolbar">
-                            <div class="colors">
+                            <div class="colors"> <!-- 色の変更-->
                                 <div class="color" id="black"></div>
                                 <div class="color" id="red"></div>
                                 <div class="color" id="blue"></div>
@@ -53,32 +52,31 @@
                                 <div class="color" id="white"></div>
 
                             </div>
-                            <div class="lines">
+                            <div class="lines"> <!-- 線の太さの変更 -->
                                 <div id="smallBox">
                                     <div id="small">
-
                                     </div>
                                 </div>
                                 <div id="middleBox">
                                     <div id="middle">
-
                                     </div>
                                 </div>
                                 <div id="largeBox">
                                     <div id="large">
-
                                     </div>
                                 </div>
                             </div>
+
+
                             <div>
-                                <input type="button" id="allDeleteButton" value="全消し">
+                                <input type="button" id="allDeleteButton" value="全消し"> <!-- canvasの全消し -->
                             </div>
 
                             <div>
-                                <input type="txt" id="answer" :disabled="isCantPushButton" v-model="answer">
+                                <input type="txt" id="answer" :disabled="isCantPushButton" v-model="answer" placeholder="回答を入力">
                             </div>
                             <div id="nextButton">
-                                <button :disabled="isCantPushButton" @click="nextUser">
+                                <button :disabled="isCantPushButton" @click="nextUser"><!-- 次のユーザへ移動 -->
                                     送信
                                 </button>
                             </div>
@@ -97,20 +95,20 @@
                                     ゲームを開始
                                 </button>
                             </div>
-                            <!-- <div>
+                            <!-- <div>　
                                 <button @click="removeMessage">
                                     メッセージをすべて削除
                                 </button>
-                            </div> -->
+                            </div> --> <!-- デバック用 -->
                         </div>
                     </div>
 
 
 
-                    <!-- <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div> -->
+                    <!-- <div>{{nowPlayer}}さんのターンです {{nowPlayerCounter}}</div> --> <!-- デバック用-->
                     <div id="chatArea">
                         <div id="chatBox">
-                            <input type="txt" id="chatInput" v-model="message">
+                            <input type="txt" id="chatInput" v-model="message" placeholder="チャット">
 
                             <div id="chatButton">
                                 <button @click="sendMessage">
@@ -122,11 +120,6 @@
 
                         <div id="chatLog" v-for="item in list">{{item.sender}} / {{item.message}}
                         </div>
-                        <!-- <div id="chatLog">
-                            <ul>
-                                <li v-for="item in list">{{item.sender}} / {{item.message}}</li>
-                            </ul>
-                        </div> -->
                     </div>
 
                     <div id="lastCanvasArea">
@@ -154,12 +147,7 @@
                 beforeAnswer: '',
                 socketio: '', //そけっとあいおー
                 image: "",
-                // context: document.getElementById("myCanvas").getContext("2d"),
-                // w: 650,
-                // h: 400,
-
-
-
+                imgUrl: "./img/default.png",
 
             },
             watch: {
@@ -177,16 +165,6 @@
                     },
                     deep: true
                 },
-                // nameList: {
-                //     handler: function (val, oldVal) {
-                //         if (!isPlaying) {
-                //             document.getElementById("myCanvas").style.pointerEvents = "auto";
-                //             document.getElementById("allDeleteButton").disabled = "";
-                //         }
-
-                //     },
-                //     deep: true
-                // },
             },
             created() {
                 this.socketio = io();
@@ -398,6 +376,9 @@
                         })
 
                         this.answer = '';
+                    }else{
+                        window.alert('回答が間違っています');
+                        this.answer = '';
                     }
                 },
 
@@ -438,15 +419,12 @@
             },
         })
     </script>
-    <script type="text/javascript">
+    <script type="text/javascript"> //ここからcanvas
         window.addEventListener("load", function () {
-            console.log('334')
+            console.log('canvas側')
 
-            // サーバーサイドのsocket.IOに接続する
-            // 接続出来たら、サーバー側のコンソールにconnected!と表示される
             var socket = io.connect("/");
 
-            // Canvas描画に必要な変数を定義する
             var canvas = document.getElementById("myCanvas");
             var context = canvas.getContext("2d");
             var w = 500;
@@ -454,7 +432,6 @@
             var drawing = false;
             var oldPos;
 
-            // Canvasを初期化する
             canvas.width = w;
             canvas.height = h;
             context.strokeStyle = "#000000";
@@ -462,7 +439,6 @@
             context.lineJoin = "round";
             context.lineCap = "round";
 
-            // Canvas上の座標を計算する為の関数たち
             function scrollX() {
                 return document.documentElement.scrollLeft || document.body.scrollLeft;
             }
@@ -479,20 +455,19 @@
                 var mouseY = event.touches[0].clientY - $(canvas).position().top + scrollY();
                 return { x: mouseX, y: mouseY };
             }
-
-            // ここからは、Canvasに描画する為の処理                             
+                             
             canvas.addEventListener("mousedown", function (event) {
-                console.log("mousedown");
+                // console.log("mousedown");
                 drawing = true;
                 oldPos = getPos(event);
             }, false);
             canvas.addEventListener("mouseup", function () {
-                console.log("mouseup");
+                // console.log("mouseup");
                 drawing = false;
             }, false);
             canvas.addEventListener("mousemove", function (event) {
                 var pos = getPos(event);
-                console.log("mousemove : x=" + pos.x + ", y=" + pos.y + ", drawing=" + drawing);
+                // console.log("mousemove : x=" + pos.x + ", y=" + pos.y + ", drawing=" + drawing);
                 if (drawing) {
                     context.beginPath();
                     context.moveTo(oldPos.x, oldPos.y);
@@ -500,20 +475,16 @@
                     context.stroke();
                     context.closePath();
 
-                    // socket.IOサーバーに、
-                    // どの点からどの点までを描画するかをの情報を送付する
+
                     socket.emit("draw", { before: oldPos, after: pos, color: context.strokeStyle, line: context.lineWidth });
                     oldPos = pos;
                 }
             }, false);
             canvas.addEventListener("mouseout", function () {
-                // console.log("mouseout");
                 drawing = false;
             }, false);
-
-            // 色や太さを選択した場合の処理
-            // 選択した結果を、Canvasに設定して、
-            // socket.IOサーバーにも送付している
+            
+            //色変えたり太さ
             $("#black").click(function () { context.strokeStyle = "black"; socket.emit("color", "black"); });
             $("#blue").click(function () { context.strokeStyle = "blue"; socket.emit("color", "blue"); });
             $("#red").click(function () { context.strokeStyle = "red"; socket.emit("color", "red"); });
@@ -530,24 +501,26 @@
             $("#middleBox").click(function () { context.lineWidth = 7; socket.emit("lineWidth", 7); });
             $("#largeBox").click(function () { context.lineWidth = 10; socket.emit("lineWidth", 10); });
 
+            //allDeleteButton
             $("#startButton").click(function () {
-                console.log("72");
+                console.log("startButton");
                 socket.emit('clearsend');
                 context.clearRect(0, 0, w, h);
             });
 
             $("#nextButton").click(function () {
-                console.log("72");
+                console.log("nextButton");
                 socket.emit('clearsend');
                 context.clearRect(0, 0, w, h);
             });
 
             $("#allDeleteButton").click(function () {
-                console.log("72");
+                console.log("allDeleteButton");
                 socket.emit('clearsend');
                 context.clearRect(0, 0, w, h);
             });
 
+            //サイトに入った時ほかのユーザが書き途中の場合描写
             socket.on('firstsend', function (msg) {
                 // console.log(msg);
                 for (key in msg) {
@@ -561,8 +534,8 @@
                     context.closePath();
                 }
             });
-            // socket.IOサーバーから描画情報を受け取った場合の処理
-            // 受け取った情報を元に、Canvasに描画を行う
+            
+            //描画の同期
             socket.on("draw", function (data) {
                 console.log("on draw : " + data);
                 context.beginPath();
@@ -572,31 +545,21 @@
                 context.closePath();
             });
 
-            // socket.IOサーバーから色情報を受け取った場合の処理
-            // Canvasに色を設定している
+            //色とか線，あとリセット
             socket.on("color", function (data) {
-                console.log("on color : " + data);
+                console.log("色変え");
                 context.strokeStyle = data;
             });
 
             socket.on("delete", function () {
-                console.log("clearRect");
+                console.log("canvasのリセット");
                 context.clearRect(0, 0, w, h);
             });
 
-
-            // socket.IOサーバーから線の太さ情報を受け取った場合の処理
-            // Canvasに線の太さを設定している
             socket.on("lineWidth", function (data) {
-                console.log("on lineWidth : " + data);
+                console.log("太さ変更");
                 context.lineWidth = data;
             });
-
-
-
-
-
-
         }, false);
 
 
@@ -609,9 +572,11 @@
             padding: 0px;
         }
 
-        body {}
-
-        .toolbar {}
+        #header{
+            width: 100%;
+            height: 50px;
+            /* background-color: #666; */
+        }
 
         #mainArea {
             margin-top: 30px;
@@ -643,22 +608,6 @@
 
         }
 
-        /* #area {
-            text-align: center;
-        } */
-
-        /* .chat {
-            padding-top: 5%;
-            float: right;
-            width: 40%;
-        } */
-
-        /* 
-        .canvas {
-            float: left;
-            width: 100%;
-
-        } */
 
         .toolbar {
             float: left;
@@ -666,7 +615,6 @@
 
         #stateBar {
             padding-left: 10px;
-            /* background-color: red; */
             width: 150px;
             float: left;
         }
@@ -843,6 +791,8 @@
             display: inline-block;
             margin: auto;
             margin-left: 5%;
+            padding: 10px;
+            border: 1px solid #ccc;
         }
     </style>
 
